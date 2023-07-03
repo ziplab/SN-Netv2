@@ -32,27 +32,29 @@ Code will be released soon.
 ### Semantic Segmentation on ADE20K and COCO-Stuff-10K
 
 <figure>
-    <img src=".github/ade20K_res.jpg">
   <center> <figcaption>ADE20K results based on SETR.</figcaption></center>
+    <img src=".github/ade20K_res.jpg">
 </figure>
 
 <figure>
+    <center> <figcaption>COCO-Stuff-10K results based on SETR.</figcaption></center>
     <img src=".github/coco_stuff_10k_res.jpg">
-  <center> <figcaption>COCO-Stuff-10K results based on SETR.</figcaption></center>
 </figure>
+
 
 
 ### Depth Estimation on NYUv2
 
 <figure>
-    <img src=".github/nyu_sl.jpg">
   <center> <figcaption>Stitching DeiT3-S and DeiT3-L based on DPT.</figcaption></center>
+  <img src=".github/nyu_sl.jpg">
 </figure>
 
 
 <figure>
-    <img src=".github/nyu_bl.jpg">
+
   <center> <figcaption>Stitching DeiT3-B and DeiT3-L based on DPT.</figcaption></center>
+   <img src=".github/nyu_bl.jpg">
 </figure>
 
 
@@ -61,8 +63,8 @@ Code will be released soon.
 
 
 <figure>
-    <img src=".github/coco_res.jpg">
   <center> <figcaption>Stitching DeiT3-S and DeiT3-L based on Mask R-CNN/ViTDet.</figcaption></center>
+  <img src=".github/coco_res.jpg">
 </figure>
 
 
