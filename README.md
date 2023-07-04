@@ -42,6 +42,11 @@ Code will be released soon.
 </figure>
 
 
+### Training Efficiency Comparison
+
+![framework](.github/train_effciency.jpg)
+
+
 
 ### Depth Estimation on NYUv2
 
