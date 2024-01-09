@@ -4,12 +4,12 @@ This is the official PyTorch implementation for [Stitched ViTs are Flexible Visi
 
 By [Zizheng Pan](https://scholar.google.com.au/citations?user=w_VMopoAAAAJ&hl=en), [Jing Liu](https://scholar.google.com.au/citations?user=-lHaZH4AAAAJ), [Haoyu He](https://scholar.google.com/citations?user=aU1zMhUAAAAJ&hl=en),  [Jianfei Cai](https://scholar.google.com/citations?user=N6czCoUAAAAJ&hl=en), and [Bohan Zhuang](https://scholar.google.com.au/citations?user=DFuDBBwAAAAJ).
 
-![framework](.github/framework.jpg)
+![framework](.github/banner.png)
 
+We adapt the framework of stitchable neural networks (SN-Net) into downstream dense prediction tasks. Compared to SNNetv1, the new framework consistently improves the performance at low FLOPs while maintaining competitive performance at high FLOPs across different datasets, thus obtaining a better Pareto frontier (highlighted in lines).
 
 
 Code will be released soon.
-
 
 
 ## Results
@@ -31,36 +31,18 @@ Code will be released soon.
 
 ### Semantic Segmentation on ADE20K and COCO-Stuff-10K
 
-<figure>
-  <center> <figcaption>ADE20K results based on SETR.</figcaption></center>
-    <img src=".github/ade20K_res.jpg">
-</figure>
-
-<figure>
-    <center> <figcaption>COCO-Stuff-10K results based on SETR.</figcaption></center>
-    <img src=".github/coco_stuff_10k_res.jpg">
-</figure>
-
-
-### Training Efficiency Comparison
-
-![framework](.github/train_effciency.jpg)
-
+ADE20K             |  COCO-Stuff-10K
+:-------------------------:|:-------------------------:
+![](.github/ade20k.png)  |  ![](.github/coco_stuff.png)
 
 
 ### Depth Estimation on NYUv2
 
 <figure>
   <center> <figcaption>Stitching DeiT3-S and DeiT3-L based on DPT.</figcaption></center>
-  <img src=".github/nyu_sl.jpg">
+  <img src=".github/depth_estimation.png">
 </figure>
 
-
-<figure>
-
-  <center> <figcaption>Stitching DeiT3-B and DeiT3-L based on DPT.</figcaption></center>
-   <img src=".github/nyu_bl.jpg">
-</figure>
 
 
 
@@ -71,6 +53,13 @@ Code will be released soon.
   <center> <figcaption>Stitching DeiT3-S and DeiT3-L based on Mask R-CNN/ViTDet.</figcaption></center>
   <img src=".github/coco_res.jpg">
 </figure>
+
+
+
+### Training Efficiency Comparison
+
+![framework](.github/train_effciency.jpg)
+
 
 
 ## License
