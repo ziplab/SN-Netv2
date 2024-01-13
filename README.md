@@ -10,26 +10,19 @@ We adapt the framework of stitchable neural networks (SN-Net) into downstream de
 
 
 
-## News
+## 📰 News
 
 - 13/01/2024. Release code on ImageNet-1K classification 🔥. The classification code is an easy way to start understanding how SN-Netv2 works and how it differs from V1.
 
 
-## TODO List
 
-- [x] Classification code
+## Getting Started
 
-- [ ] Segmentation code
-
-- [ ] Depth estimation code
-
-- [ ] Detection code
-
-- [ ] Gradio demo
+For image classification on ImageNet-1K, please refer to [classification](https://github.com/ziplab/SN-Netv2/tree/main/classification).
 
 
 
-## Results
+## ✨ Results
 
 **Understand the figures:**
 
@@ -79,7 +72,21 @@ ADE20K             |  COCO-Stuff-10K
 
 
 
-## Citation
+## 🚧 TODO List
+
+- [x] Classification code
+
+- [ ] Segmentation code
+
+- [ ] Depth estimation code
+
+- [ ] Detection code
+
+- [ ] Gradio demo
+
+
+
+## ✍ Citation
 
 If you use SN-Netv2 in your research, please consider the following BibTeX entry and giving us a star 🌟.
 

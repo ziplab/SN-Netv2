@@ -1,4 +1,4 @@
-## ImageNet Classification Code for SN-Netv2
+# ImageNet Classification Code for SN-Netv2
 
 ## Installation
 Prepare a Python environment as below
@@ -52,7 +52,9 @@ python -m torch.distributed.launch --nproc_per_node=8 \
       --dist-eval --get_flops --eval --resume [path/to/snnet_deit.pth]
 ```
 
+
+
 ## Acknowledgement
 
-This implementation is mainly based on DeiT. We thank the authors for their released code.
+This implementation is mainly based on [DeiT](https://github.com/facebookresearch/deit). We thank the authors for their released code.
 
