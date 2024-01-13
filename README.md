@@ -9,7 +9,24 @@ By [Zizheng Pan](https://scholar.google.com.au/citations?user=w_VMopoAAAAJ&hl=en
 We adapt the framework of stitchable neural networks (SN-Net) into downstream dense prediction tasks. Compared to SNNetv1, the new framework consistently improves the performance at low FLOPs while maintaining competitive performance at high FLOPs across different datasets, thus obtaining a better Pareto frontier (highlighted in lines).
 
 
-Code will be released soon.
+
+## News
+
+- 13/01/2024. Release code on ImageNet-1K classification 🔥. The classification code is an easy way to start understanding how SN-Netv2 works and how it differs from V1.
+
+
+## TODO List
+
+- [x] Classification code
+
+- [ ] Segmentation code
+
+- [ ] Depth estimation code
+
+- [ ] Detection code
+
+- [ ] Gradio demo
+
 
 
 ## Results
@@ -59,6 +76,32 @@ ADE20K             |  COCO-Stuff-10K
 ### Training Efficiency Comparison
 
 ![framework](.github/train_effciency.jpg)
+
+
+
+## Citation
+
+If you use SN-Netv2 in your research, please consider the following BibTeX entry and giving us a star 🌟.
+
+```BibTeX
+@article{pan2023snnetv2,
+  title={Stitched ViTs are Flexible Vision Backbones},
+  author={Pan, Zizheng and Liu, Jing and He, Haoyu and Cai, Jianfei and Zhuang, Bohan},
+  journal={arXiv},
+  year={2023}
+}
+```
+
+If you find the code useful, please also consider the following BibTeX entry
+
+```BibTeX
+@inproceedings{pan2023snnetv1,
+  title     = {Stitchable Neural Networks},
+  author    = {Pan, Zizheng and Cai, Jianfei and Zhuang, Bohan},
+  booktitle = {CVPR},
+  year      = {2023},
+}
+```
 
 
 
