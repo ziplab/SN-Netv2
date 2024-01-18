@@ -12,6 +12,7 @@ We adapt the framework of stitchable neural networks (SN-Net) into downstream de
 
 ## 📰 News
 
+- 18/01/2024. Huggingface online demo for image classification is live! Checkout [here](https://huggingface.co/spaces/ziplab/snnetv2-image-classification).
 - 18/01/2024. Release code for semantic segmentation on ADE20K and COCO-Stuff-10K, see the subfolder [segmentation](https://github.com/ziplab/SN-Netv2/tree/main/segmentation).
 - 13/01/2024. Release code on ImageNet-1K classification 🔥. The classification code is an easy way to start understanding how SN-Netv2 works and how it differs from V1.
 
