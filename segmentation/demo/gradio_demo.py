@@ -83,6 +83,39 @@ def main():
         total_data[int(cfg_id)] = [flops // 1e9, miou_res]
 
 
+    def visualize_stitch_pos(stitch_id):
+        if stitch_id == 13:
+            # 13 is equivalent to 0
+            stitch_id = 0
+
+        names = [f'ID {key}' for key in flops_res.keys()]
+
+        fig = px.scatter(x=flops_res.values(), y=eval_res.values(), hover_name=names)
+        fig.update_layout(
+            title=f"SN-Netv2 - Stitch ID - {stitch_id}",
+            title_x=0.5,
+            xaxis_title="GFLOPs",
+            yaxis_title="mIoU",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="RebeccaPurple"
+            ),
+            legend=dict(
+                yanchor="bottom",
+                y=0.99,
+                xanchor="left",
+                x=0.01),
+        )
+        # continent, DarkSlateGrey
+        fig.update_traces(marker=dict(size=10,
+                                      line=dict(width=2)),
+                          selector=dict(mode='markers'))
+
+        fig.add_scatter(x=[flops_res[stitch_id]], y=[eval_res[stitch_id]], mode='markers', marker=dict(size=15), name='Current Stitch')
+        return fig
+
+
     def segment_video(video, stitch_id):
 
         if stitch_id == 13:
@@ -123,11 +156,6 @@ def main():
                                               with_labels=False,
                                               )
 
-                # end_time = time.time()
-                # fps = 1 / (end_time - start_time)
-                # cv2.putText(draw_img, f'FPS: {fps:.2f}', (10, output_height-30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                # cv2.imshow('video_demo', draw_img)
-                # cv2.waitKey(args.show_wait_time)
                 if draw_img.shape[0] != output_height or draw_img.shape[
                     1] != output_width:
                     draw_img = cv2.resize(draw_img,
@@ -137,7 +165,10 @@ def main():
             if writer:
                 writer.release()
             cap.release()
-        return output_video_path
+
+        fig = visualize_stitch_pos(stitch_id)
+        
+        return output_video_path, fig
 
     def segment_image(image, stitch_id):
         if stitch_id == 13:
@@ -150,40 +181,9 @@ def main():
                                       show=False,
                                       with_labels=True,
                                       )
+        fig = visualize_stitch_pos(stitch_id)
+        return draw_img, fig
 
-        return draw_img
-
-    def visualize_stitch_pos(stitch_id):
-        if stitch_id == 13:
-            # 13 is equivalent to 0
-            stitch_id = 0
-
-        names = [f'ID {key}' for key in flops_res.keys()]
-
-        fig = px.scatter(x=flops_res.values(), y=eval_res.values(), hover_name=names)
-        fig.update_layout(
-            title=f"SN-Netv2 - Stitch ID - {stitch_id}",
-            title_x=0.5,
-            xaxis_title="GFLOPs",
-            yaxis_title="mIoU",
-            font=dict(
-                family="Courier New, monospace",
-                size=18,
-                color="RebeccaPurple"
-            ),
-            legend=dict(
-                yanchor="bottom",
-                y=0.99,
-                xanchor="left",
-                x=0.01),
-        )
-        # continent, DarkSlateGrey
-        fig.update_traces(marker=dict(size=10,
-                                      line=dict(width=2)),
-                          selector=dict(mode='markers'))
-
-        fig.add_scatter(x=[flops_res[stitch_id]], y=[eval_res[stitch_id]], mode='markers', marker=dict(size=15), name='Current Stitch')
-        return fig
 
 
     with gr.Blocks() as image_demo:
@@ -192,7 +192,7 @@ def main():
                 image_input = gr.Image(label='Input Image')
                 stitch_slider = gr.Slider(minimum=0, maximum=134, step=1, label="Stitch ID")
                 with gr.Row():
-                    clear_button = gr.ClearButton(components=[image_input, stitch_slider])
+                    clear_button = gr.ClearButton()
                     submit_button = gr.Button()
 
             with gr.Column():
@@ -202,7 +202,7 @@ def main():
             submit_button.click(
                 fn=segment_image,
                 inputs=[image_input, stitch_slider],
-                outputs=[image_output],
+                outputs=[image_output, stitch_plot],
             )
 
             stitch_slider.change(
@@ -210,6 +210,11 @@ def main():
                 inputs=[stitch_slider],
                 outputs=[stitch_plot],
                 show_progress=False
+            )
+
+            clear_button.click(
+                lambda: [None, 0, None, None],
+                outputs=[image_input, stitch_slider, image_output, stitch_plot],
             )
 
         gr.Examples(
@@ -236,7 +241,7 @@ def main():
                 video_input = gr.Video(label='Input Video')
                 stitch_slider = gr.Slider(minimum=0, maximum=134, step=1, label="Stitch ID")
                 with gr.Row():
-                    clear_button = gr.ClearButton(components=[video_input, stitch_slider])
+                    clear_button = gr.ClearButton()
                     submit_button = gr.Button()
 
             with gr.Column():
@@ -246,7 +251,7 @@ def main():
         submit_button.click(
             fn=segment_video,
             inputs=[video_input, stitch_slider],
-            outputs=[video_output],
+            outputs=[video_output, stitch_plot],
         )
 
         stitch_slider.change(
@@ -254,6 +259,11 @@ def main():
             inputs=[stitch_slider],
             outputs=[stitch_plot],
             show_progress=False
+        )
+
+        clear_button.click(
+            lambda: [None, 0, None, None],
+            outputs=[video_input, stitch_slider, video_output, stitch_plot],
         )
 
         gr.Examples(
