@@ -67,7 +67,7 @@ pip install plotly
 python app.py --config config/gradio_demo.json --resume [path/to/checkpoints]
 ```
 
-![classification_gradio_demo](/data2/github/SN-Netv2/.github/classification_gradio_demo.png)
+![classification_gradio_demo](../.github/classification_gradio_demo.png)
 
 
 
