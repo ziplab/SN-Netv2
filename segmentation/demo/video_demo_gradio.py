@@ -14,7 +14,7 @@ import json
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('--config', default='configs/setr/setr_naive_512x512_160k_b16_ade20k_deit_3_s_l_224_snnetv2.py', help='Config file')
+    parser.add_argument('--config', default='configs/snnet/setr_naive_512x512_160k_b16_ade20k_deit_3_s_l_224_snnetv2.py', help='Config file')
     parser.add_argument('--checkpoint', help='Checkpoint file', default='/data2/release_weights/ade20k/setr_naive_512x512_160k_b16_ade20k_snnetv2_deit3_s_l_lora_16_iter_160000.pth')
     # parser.add_argument('--video', help='Video file or webcam id')
 
@@ -36,7 +36,7 @@ def main():
         type=str,
         help='Fourcc of the output video')
     parser.add_argument(
-        '--output-fps', default=15, type=int, help='FPS of the output video')
+        '--output-fps', default=30, type=int, help='FPS of the output video')
     parser.add_argument(
         '--output-height',
         default=-1,
@@ -65,10 +65,10 @@ def main():
     stitch_configs_info = {i: cfg for i, cfg in enumerate(stitch_configs_info)}
 
 
-    with open('model_flops/snnet_flops_setr_naive_512x512_160k_b16_ade20k_deit_3_s_l_224_snnetv2.json', 'r') as f:
+    with open('./model_flops/snnet_flops_setr_naive_512x512_160k_b16_ade20k_deit_3_s_l_224_snnetv2.json', 'r') as f:
         flops_params = json.load(f)
 
-    with open('/data2/github/SN-Netv2/segmentation/results/eval_single_scale_20230507_235400.json', 'r') as f:
+    with open('./results/eval_single_scale_20230507_235400.json', 'r') as f:
         results = json.load(f)
 
     config_ids = list(results.keys())
@@ -84,6 +84,11 @@ def main():
 
 
     def segment_video(video, stitch_id):
+
+        if stitch_id == 13:
+            # 13 is equivalent to 0
+            stitch_id = 0
+
         model.backbone.reset_stitch_id(stitch_id)
         output_video_path = './temp_video.avi'
         cap = cv2.VideoCapture(video)
@@ -132,6 +137,13 @@ def main():
             if writer:
                 writer.release()
             cap.release()
+        return output_video_path
+
+
+    def visualize_stitch_pos(stitch_id):
+        if stitch_id == 13:
+            # 13 is equivalent to 0
+            stitch_id = 0
 
         names = [f'ID {key}' for key in flops_res.keys()]
 
@@ -153,9 +165,7 @@ def main():
                           selector=dict(mode='markers'))
 
         fig.add_scatter(x=[flops_res[stitch_id]], y=[eval_res[stitch_id]], mode='markers', marker=dict(size=20, color='red'), name='Current Stitch')
-
-        return output_video_path, fig
-
+        return fig
 
 
     with gr.Blocks() as demo:
@@ -168,9 +178,10 @@ def main():
             with gr.Row():
                 with gr.Column():
                     video_input = gr.Video(label='Input Video')
-                    # video_input = gr.Video(label='Input Video', sources='upload')
                     stitch_slider = gr.Slider(minimum=0, maximum=134, step=1, label="Stitch ID")
-                    submit_button = gr.Button()
+                    with gr.Row():
+                        clear_button = gr.ClearButton(components=[video_input, stitch_slider])
+                        submit_button = gr.Button()
 
                 with gr.Column():
                     video_output = gr.Video(label='Segmentation Results')
@@ -179,11 +190,31 @@ def main():
             submit_button.click(
                 fn=segment_video,
                 inputs=[video_input, stitch_slider],
-                outputs=[video_output, stitch_plot]
+                outputs=[video_output],
+            )
+
+            stitch_slider.change(
+                fn=visualize_stitch_pos,
+                inputs=[stitch_slider],
+                outputs=[stitch_plot],
+                show_progress=False
+            )
+
+            gr.Examples(
+                [
+                    ['./demo/video_demo_input.mp4', 0],
+                ],
+                inputs=[
+                    video_input,
+                    stitch_slider
+                ],
+                outputs=[
+                    video_output,
+                    stitch_plot
+                ],
             )
 
     demo.launch()
-    # demo.launch(share=True)
 
 
 if __name__ == '__main__':

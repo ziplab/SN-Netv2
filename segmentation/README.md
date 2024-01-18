@@ -80,25 +80,6 @@ python demo/video_demo.py 0 [path/to/config] [path/to/checkpoint] --stitch-id 0 
 > 0 means using webcam, you can also pass a path to a video. see official demo from [mmsegmentation](https://github.com/open-mmlab/mmsegmentation/blob/main/demo/video_demo.py).
 
 
-
-## Gradio Demo
-
-First, install gradio by 
-
-```bash
-pip install gradio
-```
-
-Next, run the gradio demo by 
-
-```bash
-python demo/video_demo_gradio.py
-```
-
-
-
-![gradio_demo](/data2/github/SN-Netv2/segmentation/demo/gradio_demo.png)
-
 ## Acknowledgement
 
 This code is built upon [mmsegmentation](https://github.com/open-mmlab/mmsegmentation).

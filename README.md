@@ -12,14 +12,34 @@ We adapt the framework of stitchable neural networks (SN-Net) into downstream de
 
 ## 📰 News
 
+- 18/01/2024. Release code for semantic segmentation on ADE20K and COCO-Stuff-10K, see the subfolder [segmentation](https://github.com/ziplab/SN-Netv2/tree/main/segmentation).
 - 13/01/2024. Release code on ImageNet-1K classification 🔥. The classification code is an easy way to start understanding how SN-Netv2 works and how it differs from V1.
 
 
 
-## Getting Started
+## 💪 Getting Started
 
 For image classification on ImageNet-1K, please refer to [classification](https://github.com/ziplab/SN-Netv2/tree/main/classification).
 
+For semantic segmentation on ADE20K and COCO-Stuff-10K, please refer to [segmentation](https://github.com/ziplab/SN-Netv2/tree/main/segmentation).
+
+
+## 🪄 Gradio Demo for Segmentation
+
+First, install gradio by 
+
+```bash
+pip install gradio
+```
+
+Next, install the required packages at segmentation, then run the gradio demo by 
+
+```bash
+cd segmentation
+python demo/video_demo_gradio.py --config [path/to/config] --checkpoint [path/to/checkpoint]
+```
+
+![gradio_demo](.github/gradio_demo.png)
 
 
 ## ✨ Results
@@ -36,7 +56,6 @@ For image classification on ImageNet-1K, please refer to [classification](https:
 ### Image Classification on ImageNet-1K
 
 ![framework](.github/imagenet_res.jpg)
-
 
 
 ### Semantic Segmentation on ADE20K and COCO-Stuff-10K
@@ -76,7 +95,7 @@ ADE20K             |  COCO-Stuff-10K
 
 - [x] Classification code
 
-- [ ] Segmentation code
+- [x] Segmentation code
 
 - [ ] Depth estimation code
 
