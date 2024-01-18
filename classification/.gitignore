@@ -5,4 +5,3 @@ imnet_resnet50_scratch/timm_temp/
 checkpoints/
 outputs/
 *.pth
-model_flops/
