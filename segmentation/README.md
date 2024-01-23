@@ -1,3 +1,5 @@
+# Semantic Segmentation Code for SN-Netv2
+
 ## Installation
 
 ```bash
@@ -16,7 +18,7 @@ sudo apt-get install ffmpeg
 
 
 
-# Pretrained Weights
+## Pretrained Weights
 
 | Dataset        | Small ViT | Large ViT | Train Iter | Weights                                                      |
 | -------------- | --------- | --------- | ---------- | ------------------------------------------------------------ |

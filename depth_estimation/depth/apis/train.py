@@ -1,0 +1,178 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import random
+import warnings
+
+import numpy as np
+import torch
+from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
+from mmcv.runner import build_optimizer, build_runner
+
+from depth.core import DistEvalHook, EvalHook
+from depth.datasets import build_dataloader, build_dataset
+from depth.utils import get_root_logger
+import os
+import json
+
+
+def set_random_seed(seed, deterministic=False):
+    """Set random seed.
+
+    Args:
+        seed (int): Seed to be used.
+        deterministic (bool): Whether to set the deterministic option for
+            CUDNN backend, i.e., set `torch.backends.cudnn.deterministic`
+            to True and `torch.backends.cudnn.benchmark` to False.
+            Default: False.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    if deterministic:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+def group_subnets_by_flops(data, flops_step=10):
+    sorted_data = {k: v for k, v in sorted(data.items(), key=lambda item: item[1])}
+    candidate_idx = []
+    grouped_cands = []
+    last_flops = 0
+    for cfg_id, flops in sorted_data.items():
+        # flops, _ = values
+        flops = flops // 1e9
+        if abs(last_flops - flops) > flops_step:
+            if len(candidate_idx) > 0:
+                grouped_cands.append(candidate_idx)
+            candidate_idx = [int(cfg_id)]
+            last_flops = flops
+        else:
+            candidate_idx.append(int(cfg_id))
+
+    if len(candidate_idx) > 0:
+        grouped_cands.append(candidate_idx)
+
+    return grouped_cands
+
+def initialize_model_stitching_layer(model, data_loader, device):
+    print(data_loader)
+    dataiter = iter(data_loader)
+    # for i in range(1)
+    images = []
+    total_samples = 10
+    batch_size = data_loader.batch_size
+    num_iter = total_samples // batch_size
+    for i in range(num_iter):
+        item = dataiter.next()
+        images.append(item['img'].data[0])
+    images = torch.cat(images, dim=0)
+    # images = torch.nn.functional.interpolate(images, size=(512, 512), mode='bilinear')
+    samples = images.to(device, non_blocking=True)
+    model.module.backbone.initialize_stitching_weights(samples)
+
+
+def train_depther(model,
+                    dataset,
+                    cfg,
+                    distributed=False,
+                    validate=False,
+                    timestamp=None,
+                    meta=None):
+    """Launch depther training."""
+    logger = get_root_logger(cfg.log_level)
+
+    # prepare data loaders
+    dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
+    data_loaders = [
+        build_dataloader(
+            ds,
+            cfg.data.samples_per_gpu,
+            cfg.data.workers_per_gpu,
+            # cfg.gpus will be ignored if distributed
+            len(cfg.gpu_ids),
+            dist=distributed,
+            seed=cfg.seed,
+            drop_last=True,
+        persistent_workers=False) for ds in dataset
+    ]
+
+    # put model on gpus
+    if distributed:
+        find_unused_parameters = cfg.get('find_unused_parameters', False)
+        # Sets the `find_unused_parameters` parameter in
+        # torch.nn.parallel.DistributedDataParallel
+        model = MMDistributedDataParallel(
+            model.cuda(),
+            device_ids=[torch.cuda.current_device()],
+            broadcast_buffers=False,
+            find_unused_parameters=find_unused_parameters)
+    else:
+        model = MMDataParallel(
+            model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+
+
+    if hasattr(model.module.backbone, 'anchors'):
+        # initialize stitching layer
+        if cfg.resume_from is None:
+            initialize_model_stitching_layer(model, data_loaders[0], torch.cuda.current_device())
+
+        cfg_name = cfg.filename.split('/')[-1].split('.')[0]
+        with open('flops_small_large.json', 'r') as f:
+            flops_params = json.load(f)
+
+        flops_step = 10
+        if hasattr(cfg, 'flops_step'):
+            flops_step = cfg.flops_step
+        grouped_subnet = group_subnets_by_flops(flops_params, flops_step)
+        model.module.backbone.flops_grouped_cfgs = grouped_subnet
+
+    # build runner
+    optimizer = build_optimizer(model, cfg.optimizer)
+
+    if cfg.get('runner') is None:
+        cfg.runner = {'type': 'IterBasedRunner', 'max_iters': cfg.total_iters}
+        warnings.warn(
+            'config is now expected to have a `runner` section, '
+            'please set `runner` in your config.', UserWarning)
+
+    runner = build_runner(
+        cfg.runner,
+        default_args=dict(
+            model=model,
+            batch_processor=None,
+            optimizer=optimizer,
+            work_dir=cfg.work_dir,
+            logger=logger,
+            meta=meta))
+
+    # register hooks
+    runner.register_training_hooks(cfg.lr_config, cfg.optimizer_config,
+                                   cfg.checkpoint_config, cfg.log_config,
+                                   cfg.get('momentum_config', None),
+                                   custom_hooks_config=cfg.get('custom_hooks', None))
+
+    # an ugly walkaround to make the .log and .log.json filenames the same
+    runner.timestamp = timestamp
+
+    # register eval hooks
+    if validate:
+        val_dataset = build_dataset(cfg.data.val, dict(test_mode=True))
+        val_dataloader = build_dataloader(
+            val_dataset,
+            samples_per_gpu=1,
+            workers_per_gpu=cfg.data.workers_per_gpu,
+            dist=distributed,
+            shuffle=False,
+        persistent_workers=False)
+        eval_cfg = cfg.get('evaluation', {})
+        eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
+        eval_hook = DistEvalHook if distributed else EvalHook
+        # In this PR (https://github.com/open-mmlab/mmcv/pull/1193), the
+        # priority of IterTimerHook has been modified from 'NORMAL' to 'LOW'.
+        runner.register_hook(
+            eval_hook(val_dataloader, **eval_cfg), priority='LOW')
+
+    if cfg.resume_from:
+        runner.resume(cfg.resume_from)
+    elif cfg.load_from:
+        runner.load_checkpoint(cfg.load_from)
+    runner.run(data_loaders, cfg.workflow)
